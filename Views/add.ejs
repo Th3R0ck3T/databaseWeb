@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="CSS/global.css">
+    <link rel="stylesheet" href="CSS/add.css">
+    <title>Add game</title>
+</head>
+
+<body>
+    <header>
+        <%- include('Layouts/header') %>
+    </header>
+
+    <div class="container">
+        <div class="kontafom">
+            <h1>Add game</h1>
+            <form action="/add" method="POST" id="formular">
+                <input type="text" placeholder="Nadpis" name="game[nadpis]"><br>
+                <textarea id="detail" name="game[detail]" placeholder="Detail hry"></textarea><br>
+                <input type="number" placeholder="Cena" name="game[cena]"><br>
+
+                <!-- Radio buttony ve sloupcích -->
+                <div class="category-column">
+                    <div class="category-row">
+                        <input type="radio" id="action" name="category[Akční]" value="Akční">
+                        <label for="action">Akční</label>
+                    </div>
+                    <div class="category-row">
+                        <input type="radio" id="adventure" name="category" value="Dobrodružné">
+                        <label for="adventure">Dobrodružné</label>
+                    </div>
+                    <div class="category-row">
+                        <input type="radio" id="strategy" name="category" value="Strategické">
+                        <label for="strategy">Strategické</label>
+                    </div>
+                </div>
+
+                <div class="category-column">
+                    <div class="category-row">
+                        <input type="radio" id="rpg" name="category" value="RPG">
+                        <label for="rpg">RPG</label>
+                    </div>
+                    <div class="category-row">
+                        <input type="radio" id="puzzle" name="category" value="Hlavolamy">
+                        <label for="puzzle">Hlavolamy</label>
+                    </div>
+                    <div class="category-row">
+                        <input type="radio" id="simulation" name="category" value="Simulace">
+                        <label for="simulation">Simulace</label>
+                    </div>
+                </div>
+
+                <div class="category-column">
+                    <div class="category-row">
+                        <input type="radio" id="sports" name="category" value="Sportovní">
+                        <label for="sports">Sportovní</label>
+                    </div>
+                    <div class="category-row">
+                        <input type="radio" id="horror" name="category" value="Hororové">
+                        <label for="horror">Hororové</label>
+                    </div>
+                    <div class="category-row">
+                        <input type="radio" id="sandbox" name="category" value="Sandbox">
+                        <label for="sandbox">Sandbox</label>
+                    </div>
+                </div>
+
+                <p>File</p>
+                <input type="file"><br><br>
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+    <footer>
+        <%- include('Layouts/footer')%>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+/* CSS pro sloupce a řádky checkboxů */
+.category-column {
+    display: inline-block;
+    vertical-align: top;
+    width: 30%; /* šířka sloupce */
+}
+.category-row {
+    margin-bottom: 10px; /* mezera mezi řádky */
+}
+input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }

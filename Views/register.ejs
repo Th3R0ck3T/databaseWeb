@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="CSS\global.css">
+    <title>Login</title>
+</head>
+
+<body>
+    <header>
+        <%- include('Layouts/header') %>
+    </header>
+    <div class="container">
+        <h2>Registrace</h2>
+        <form id="formular" action="/register" method="POST" onsubmit="SendRegisterInfo()">
+            <input type="text" id="reg_username" placeholder="Uživatelské jméno" name="user[username]">
+            <input type="email" placeholder="E-mail" name="user[email]">
+            <input type="password" id="reg_password" placeholder="Heslo" name="user[password]">
+            <input type="password" id="reg_confirmPassword" placeholder="Potvrďte heslo" name="user[confirmPassword]">
+            <div id="register-error" class="error-message"></div>
+            <button class="submit" type="submit" onclick="SendRegInfo()">Registrovat</button>
+        </form>
+        <p class="form-links">Již máte účet? <a href="/login">Přihlásit se</a></p>
+    </div>
+    <footer>
+        <%- include('Layouts/footer')%>
+    </footer>
+</body>
+
+</html>

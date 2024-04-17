@@ -1,0 +1,23 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.grid-game {
+    position: relative;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+.grid-game a {
+    text-decoration: none;
+    color: #333;
+}
+
+.edit {
+    position: absolute;
+    right: 0;
+    padding-right: 10px;
+}
