@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="CSS/global.css">
+    <link rel="stylesheet" href="../CSS/global.css">
     <title>Detail</title>
 </head>
 <body>
@@ -13,9 +13,35 @@
     </header>
 
     <div class="container">
-        <h1>Nazev hry</h1>
-        <p>Detaily</p>
+        <h1><%=game.Jmeno%></h1>
+        <p>Popis: <%=game.Popis%></p>
+        <p>Kategorie: <%=game.Kategorie%></p>
+        <span>Počet kouepní: <%=game.PocetKoupeni%></span>
+        <p>Datum vzniku: <%=game.DatumVzniku%></p>
+        <p>Cena: <%= game.Cena %> Kč</p>
+        <% if(isVyvojar) { %>
+        <form action="/detail/<%=game.HraID%>?_method=DELETE" method="post">
+            <button class="deleteButton">Smazat hru</button>
+        </form>
+        <form action="/detail/<%=game.HraID%>/edit">
+            <button class="editButton">Editovat hru</button>
+        </form>
+        <% } %>
+        <% if (currentUser) { %>
+            <% if (game.Koupena) { %>
+                <span>Již v knihovně</span>
+            <% } else { %>
+            
+                <form action="/buy/<%= game.HraID %>" method="POST">
+                    <button type="submit">Koupit</button>
+                </form>
+                <form action="/borrow/<%= game.HraID %>" method="POST">
+                    <button type="submit">Vypůjčit</button>
+                </form>
+            <% } %>
+        <% } %>
     </div>
+    
     <footer>
         <%- include('Layouts/footer')%>
     </footer>

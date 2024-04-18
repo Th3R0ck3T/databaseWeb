@@ -261,7 +261,7 @@ Hra.hasMany(Recenze, { foreignKey: 'HraID' });
 
 // Vztah mezi tabulkami SeznamHer a Uzivatel
 SeznamHer.belongsTo(Uzivatel, { foreignKey: 'UzivatelID' });
-
+SeznamHer.belongsTo(Hra, { foreignKey: 'HraID' });
 // Tabulka VyvojarHra
 Uzivatel.belongsToMany(Hra, { through: 'VyvojarHra', foreignKey: 'UzivatelID' });
 Hra.belongsToMany(Uzivatel, { through: 'VyvojarHra', foreignKey: 'HraID' });

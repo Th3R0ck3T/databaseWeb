@@ -14,18 +14,24 @@
     </header>
 
     <div class="container">
+        <h1>Profil</h1>
+        <div>
+            <p>Peněženka: <%= uzivatel.Zustatek %></p>
+            <form action="/addCash" method="POST">
+                <input type="number" placeholder="Kolik dáš do peněženky?" name="amount">
+                <input type="submit">
+            </form>
+        </div>
         <h1>Library</h1>
-        <a href="add.html"><p>Add game</p></a>
         <div class="grid">
-            <div class="grid-game"><a href="detail.html">Hra 1</a><a href="edit.html" class="edit">Edit</a></div>
-            <div class="grid-game"><a href="detail.html">Hra 2</a><a href="edit.html" class="edit">Edit</a></div>
-            <div class="grid-game"><a href="detail.html">Hra 3</a><a href="edit.html" class="edit">Edit</a></div>
-            <div class="grid-game"><a href="detail.html">Hra 4</a><a href="edit.html" class="edit">Edit</a></div>
-            <div class="grid-game"><a href="detail.html">Hra 5</a><a href="edit.html" class="edit">Edit</a></div>
-            <div class="grid-game"><a href="detail.html">Hra 6</a><a href="edit.html" class="edit">Edit</a></div>
-            <div class="grid-game"><a href="detail.html">Hra 7</a><a href="edit.html" class="edit">Edit</a></div>
-            <div class="grid-game"><a href="detail.html">Hra 8</a><a href="edit.html" class="edit">Edit</a></div>
-            <div class="grid-game"><a href="detail.html">Hra 9</a><a href="edit.html" class="edit">Edit</a></div>
+            <% games.forEach(game => { %>
+                <div class="grid-game">
+                    <a href="/detail/<%= game.HraID %>"><%= game.Hra.Jmeno %></a>
+                    <% if (game.DatumVyprchaniPujcky) { %>
+                        <span class="expiration-date">Expires: <%= game.DatumVyprchaniPujcky.toLocaleDateString() %></span>
+                    <% } %>
+                </div>
+            <% }); %>
         </div>
     </div>
     <footer>

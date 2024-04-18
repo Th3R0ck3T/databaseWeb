@@ -10,9 +10,27 @@ router.route('/')
 router.route('/library')
 .get(controller.getAllGameLibrary)
 
+router.route('/addCash')
+.post(controller.addCash)
+
+router.route('/detail/:id')
+.get(catchAsync(controller.showGameDetail))
+.patch(catchAsync(controller.updateGame))
+.delete(catchAsync(controller.deleteGame))
+
+router.route('/detail/:id/edit')
+.get(catchAsync(controller.renderEditGame))
+
 router.route('/add')
 .get(controller.renderAddGameIndex)
 .post(controller.addGameIndex)
+
+router.route('/buy/:id')
+.post(controller.buyGame)
+
+router.route('/borrow/:id')
+.post(controller.borrowGame)
+
 
 router.route('/register')
 .get(controller.getRegisterPage)

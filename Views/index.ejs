@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="CSS\index.css">
-    <link rel="stylesheet" href="CSS\global.css">
+    <link rel="stylesheet" href="/CSS/index.css">
+    <link rel="stylesheet" href="/CSS/global.css">
     <title>Knihovna Her</title>
 </head>
 <body>
@@ -17,8 +17,25 @@
     
         <div class="grid">
             <% games.forEach(function(game) { %>
-            <div class="grid-game"><a href="/detail"><%= game.Jmeno %></a></div>
+            <div class="grid-game"><a href="/detail/<%=game.HraID%>"><%= game.Jmeno %></a>
+            
+            <% if (currentUser) { %>
+                <% if (game.Koupena) { %>
+                    <span>Již v <a href="/library">knihovně</a></span>
+                <% } else { %>
+                    <p>Cena: <%= game.Cena %> Kč</p>
+                    <form action="/buy/<%= game.HraID %>" method="POST">
+                        <button type="submit">Koupit</button>
+                    </form>
+                    <form action="/borrow/<%= game.HraID %>" method="POST">
+                        <button type="submit">Vypůjčit</button>
+                    </form>
+                <% } %>
+            <% } %>
+        </div>
             <% }); %>
+           
+           
         </div>
     </div>
     <footer>
