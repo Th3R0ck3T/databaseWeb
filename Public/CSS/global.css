@@ -55,3 +55,9 @@ nav a:hover {
 #main {
     text-align: left;
 }
+
+img {
+    width: 50%;
+    height: auto;
+    object-fit: cover;
+}

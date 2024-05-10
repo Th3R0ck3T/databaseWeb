@@ -155,6 +155,10 @@ const Hra = sequelize.define('Hra', {
     Kategorie: {
       type: DataTypes.STRING(50),
       allowNull: false,
+    },
+    Obrazek: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
     }
     /*KategorieID: {
       type: DataTypes.INTEGER,
@@ -337,4 +341,4 @@ sequelize.sync()
     console.error('Error syncing models:', err);
   });
 
-module.exports = { PrihlasovaciUdaje, Uzivatel, Hra, Recenze, SeznamHer, VyvojarHra, Logins };
+module.exports = { PrihlasovaciUdaje, Uzivatel, Hra, Recenze, SeznamHer, VyvojarHra, Logins, sequelize };

@@ -13,6 +13,13 @@
     </header>
 
     <div class="container">
+        <div class="obrazek">
+            <% if (game.Obrazek) { %>
+                <img src="/images/uploads/<%=game.Obrazek%>" alt="Obrázek receptu">
+                <% } else { %>
+                    <img src="/images/default-image.png" alt="Výchozí obrázek">
+             <% } %>
+        </div>
         <h1><%=game.Jmeno%></h1>
         <p>Popis: <%=game.Popis%></p>
         <p>Kategorie: <%=game.Kategorie%></p>

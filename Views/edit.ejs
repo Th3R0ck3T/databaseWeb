@@ -16,7 +16,7 @@
     <div class="container">
         <div class="kontafom">
             <h1>Editovaní hry</h1>
-            <form action="/detail/<%=game.HraID%>/?_method=PATCH" method="POST" id="formular" >
+            <form action="/detail/<%=game.HraID%>/?_method=PATCH" method="POST" id="formular" enctype="multipart/form-data">
                 <input type="text" placeholder="Nadpis" name="game[nadpis]" value="<%= game.Jmeno %>"><br>
                 <textarea id="detail" name="game[detail]" placeholder="Detail hry"><%= game.Popis %></textarea><br>
                 <input type="number" placeholder="Cena" name="game[cena]" value="<%= game.Cena %>"><br>
@@ -68,7 +68,7 @@
                 </div>
 
                 <p>File</p>
-                <input type="file"><br><br>
+                <input type="file" name="obrazek" accept="image/*"><br><br>
                 <input type="submit">
             </form>
         </div>

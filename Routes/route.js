@@ -4,6 +4,21 @@ const controller = require('../Controllers/controller')
 const catchAsync = require('../utils/catchAsync');
 const { areCredentialsVerified, isLoggedIn } = require('../MiddleWare/checkAuthStatus');
 
+const multer = require('multer')
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, "./public/images/uploads");
+    },
+    filename: function (req,file,cb) {
+        cb(null, Date.now() + "_" + file.originalname);
+    }
+});
+
+const upload = multer ({
+    storage: storage,
+}).single("obrazek");
+
 router.route('/')
 .get(controller.getAllGameIndex)
 
@@ -15,15 +30,15 @@ router.route('/addCash')
 
 router.route('/detail/:id')
 .get(catchAsync(controller.showGameDetail))
-.patch(catchAsync(controller.updateGame))
-.delete(catchAsync(controller.deleteGame))
+.patch(isLoggedIn, upload ,catchAsync(controller.updateGame))
+.delete(isLoggedIn, catchAsync(controller.deleteGame))
 
 router.route('/detail/:id/edit')
 .get(catchAsync(controller.renderEditGame))
 
 router.route('/add')
-.get(controller.renderAddGameIndex)
-.post(controller.addGameIndex)
+.get(catchAsync(controller.renderAddGameIndex))
+.post(isLoggedIn ,upload,catchAsync(controller.addGameIndex))
 
 router.route('/buy/:id')
 .post(controller.buyGame)

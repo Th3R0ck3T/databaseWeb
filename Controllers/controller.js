@@ -1,7 +1,8 @@
 const sql = require('mssql');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
+const path = require('path');
 const model = require('../Models/model');
-const { Sequelize } = require('sequelize');
 
 const admin = "admin"
 const adminPassword = "admin";
@@ -147,7 +148,10 @@ exports.addGameIndex = async (req, res) => {
     const { nadpis, detail, cena } = req.body.game;
     const category = req.body.category;
     const userId = req.session.userId; // Získání ID přihlášeného uživatele
-
+    let obrazek = null;
+    if(req.file){
+        obrazek = req.file.filename;
+    }
     try {
         // Vytvoření hry v databázi
         const newGame = await model.Hra.create({
@@ -155,6 +159,7 @@ exports.addGameIndex = async (req, res) => {
             Popis: detail,
             Cena: cena,
             Kategorie: category,
+            Obrazek: obrazek,
             DatumVzniku: new Date()
         });
 
@@ -203,7 +208,10 @@ exports.updateGame = async (req, res) => {
     const userId = req.session.userId; // Získání ID přihlášeného uživatele
     const { nadpis, detail, cena } = req.body.game;
     const category = req.body.category;
-
+    let obrazek = null;
+    if (req.file) {
+        obrazek = req.file.filename;
+    } 
     try {
         // Najděte hru podle ID
         const game = await model.Hra.findByPk(gameId);
@@ -212,6 +220,15 @@ exports.updateGame = async (req, res) => {
             return res.status(404).json({ error: 'Hra nebyla nalezena' });
         }
 
+
+        if (game.Obrazek) {
+            const imagePath = path.join(__dirname, '../Public/images/uploads', game.Obrazek);
+            if(fs.existsSync(imagePath)){
+                fs.unlinkSync(imagePath); 
+            } 
+        }
+        
+       
         // Zkontrolujte, zda je přihlášený uživatel tvůrcem hry
         const isAuthor = await model.VyvojarHra.findOne({ where: { UzivatelID: userId, HraID: gameId } });
 
@@ -224,7 +241,8 @@ exports.updateGame = async (req, res) => {
         game.Popis = detail;
         game.Cena = cena;
         game.Kategorie = category;
-
+        game.Obrazek = obrazek;
+        
         await game.save();
 
         res.status(200).redirect(`/detail/${gameId}`);
@@ -251,6 +269,13 @@ exports.deleteGame = async (req, res) => {
         await model.VyvojarHra.destroy({ where: { UzivatelID: userId, HraID: gameId } });
 
         // Smažte záznam z tabulky Hra
+       const game = await model.Hra.findByPk(gameId);
+       if(game.Obrazek){
+        const imagePath = path.join(__dirname, '../Public/images/uploads', game.Obrazek);
+        if(fs.existsSync(imagePath)){
+            fs.unlinkSync(imagePath); 
+        }
+       }
         await model.Hra.destroy({ where: { HraID: gameId } });
 
         res.status(200).redirect('/');
@@ -380,14 +405,14 @@ exports.registerUser = async (req, res) => {
         // SQL dotaz pro vytvoření uživatele v databázi s odpovídajícími oprávněními
         const createUserSQL = `
             CREATE LOGIN ${username} WITH PASSWORD = '${hashedPassword}';
-            USE databaze; -- Nahraďte 'databaze' názvem vaší databáze
+            USE master;
             CREATE USER ${username} FOR LOGIN ${username};
             GRANT SELECT, INSERT, UPDATE, DELETE ON Hra TO ${username};
             GRANT SELECT, INSERT, UPDATE, DELETE ON Recenze TO ${username};
         `;
 
         // Spuštění SQL dotazu
-        await Sequelize.query(createUserSQL);
+        await model.sequelize.query(createUserSQL);
 
 
         // Odeslání výsledků jako odpověď
