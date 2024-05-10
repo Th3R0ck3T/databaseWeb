@@ -1,5 +1,51 @@
 const { Sequelize, DataTypes } = require('sequelize');
-console.log("model funguje")
+const express = require('express');
+const app = express();
+
+app.use((req, res, next) => {
+  if (req.session.userId) {
+    if(req.session.isAdmin){
+      sequelize = new Sequelize('databaze', "sa", "heslo123", {
+        dialect: 'mssql',
+        host: 'localhost',
+        port: 1433,
+        dialectOptions: {
+            options: {
+                encrypt: false,
+                trustServerCertificate: true,
+            }
+        }
+    });
+    }
+      // Přihlášený uživatel
+      const { username, password } = req.user;
+      sequelize = new Sequelize('databaze', username, password, {
+          dialect: 'mssql',
+          host: 'localhost',
+          port: 1433,
+          dialectOptions: {
+              options: {
+                  encrypt: false,
+                  trustServerCertificate: true,
+              }
+          }
+      });
+  } else {
+      // Host
+      sequelize = new Sequelize('databaze', 'host', 'Heslo123', {
+          dialect: 'mssql',
+          host: 'localhost',
+          port: 1433,
+          dialectOptions: {
+              options: {
+                  encrypt: false,
+                  trustServerCertificate: true,
+              }
+          }
+      });
+  }
+  next();
+});
 const sequelize = new Sequelize('master', 'sa', 'heslo123', {
   dialect: 'mssql',
   host: 'localhost',
@@ -248,6 +294,22 @@ const Hra = sequelize.define('Hra', {
     timestamps: false
   });
 
+  const Logins = sequelize.define('Logins', {
+    // definice sloupců
+    UserName: {
+      type: DataTypes.STRING(20),
+      allowNull: false
+    },
+    LoginTime: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+    // další sloupce podle potřeby
+  }, {
+    tableName: 'Logins', // Nastavení názvu tabulky
+    timestamps: false // Pokud nechcete Sequelize automaticky spravovat timestampy
+  });
+
 // Vytvoření vztahu mezi tabulkami
 // vztah mezi tabulkami Uzivatel a prihlasovaciUdaje
 Uzivatel.belongsTo(PrihlasovaciUdaje, { foreignKey: 'PrihlasovaciUdajeID' });
@@ -275,4 +337,4 @@ sequelize.sync()
     console.error('Error syncing models:', err);
   });
 
-module.exports = { PrihlasovaciUdaje, Uzivatel, Hra, Recenze, SeznamHer, VyvojarHra };
+module.exports = { PrihlasovaciUdaje, Uzivatel, Hra, Recenze, SeznamHer, VyvojarHra, Logins };

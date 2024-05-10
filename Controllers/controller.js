@@ -1,12 +1,38 @@
 const sql = require('mssql');
 const bcrypt = require('bcrypt');
 const model = require('../Models/model');
+const { Sequelize } = require('sequelize');
 
+const admin = "admin"
+const adminPassword = "admin";
+
+async function logUserLogin(username) {
+    try {
+        const request = new sql.Request();
+
+        // Volání uložené procedury LogUserLogin s parametrem username
+        await request.input('UserName', sql.NVarChar(50), username)
+                     .execute('LogUserLogin');
+    console.log("stala se procedura")
+    } catch (error) {
+        console.error('Error logging user login:', error);
+    }
+}
+
+exports.getLogs = async (req, res) =>{
+    try {
+        const logs = await model.Logins.findAll({});
+
+        res.render('logs', { logs });
+    } catch (error) {
+        res.status(500).send('Internal Server Error');
+    }
+}
 
 exports.getAllGameIndex = async (req, res) => {
     try {
+    
         let games = [];
-
         // Získání her z databáze SQL
         const sqlResult = await new sql.Request().query('SELECT * FROM Hra');
 
@@ -153,18 +179,18 @@ exports.renderEditGame = async (req, res) => {
         const gameId = req.params.id;
         const userId = req.session.userId; // Získání ID přihlášeného uživatele
         const game = await model.Hra.findByPk(gameId);
-    
+
         if (!game) {
             return res.status(404).json({ error: 'Hra nenalezena' });
         }
-        
+
         // Zkontrolujte, zda je přihlášený uživatel tvůrcem hry
         const isAuthor = await model.VyvojarHra.findOne({ where: { UzivatelID: userId, HraID: gameId } });
-    
+
         if (!isAuthor) {
             return res.status(403).json({ error: 'Nemáte oprávnění k úpravě této hry' });
         }
-    
+
         res.render('edit', { game: game }); // Předání informací o hře do šablony detailů
     } catch (error) {
         console.error('Chyba při získávání detailů hry:', error);
@@ -177,7 +203,7 @@ exports.updateGame = async (req, res) => {
     const userId = req.session.userId; // Získání ID přihlášeného uživatele
     const { nadpis, detail, cena } = req.body.game;
     const category = req.body.category;
-    
+
     try {
         // Najděte hru podle ID
         const game = await model.Hra.findByPk(gameId);
@@ -288,7 +314,7 @@ exports.borrowGame = async (req, res) => {
 
     try {
         // Zkontrolujeme, zda je hra již v knihovně uživatele
-        const existingGame = await model.SeznamHer.findOne({ 
+        const existingGame = await model.SeznamHer.findOne({
             where: { HraID: gameId, UzivatelID: req.session.userId }
         });
 
@@ -307,7 +333,7 @@ exports.borrowGame = async (req, res) => {
                 UzivatelID: req.session.userId,
                 DatumKoupe: currentDate,
                 DatumVyprchaniPujcky: expirationDate,
-                Koupena: true 
+                Koupena: true
             });
 
             res.status(201).redirect('/library');
@@ -350,12 +376,27 @@ exports.registerUser = async (req, res) => {
             Zustatek: 0,
             PrihlasovaciUdajeID: createdLogin.PrihlasovaciUdajeID
         });
+
+        // SQL dotaz pro vytvoření uživatele v databázi s odpovídajícími oprávněními
+        const createUserSQL = `
+            CREATE LOGIN ${username} WITH PASSWORD = '${hashedPassword}';
+            USE databaze; -- Nahraďte 'databaze' názvem vaší databáze
+            CREATE USER ${username} FOR LOGIN ${username};
+            GRANT SELECT, INSERT, UPDATE, DELETE ON Hra TO ${username};
+            GRANT SELECT, INSERT, UPDATE, DELETE ON Recenze TO ${username};
+        `;
+
+        // Spuštění SQL dotazu
+        await Sequelize.query(createUserSQL);
+
+
         // Odeslání výsledků jako odpověď
         const user = await model.Uzivatel.findOne({ where: { Jmeno: username } });
         req.session.userId = user.UzivatelID;
         req.session.username = username;
+        req.session.password = hashedPassword;
 
-        res.status(302).redirect('/');        
+        res.status(302).redirect('/');
     } catch (error) {
         console.error('Error registering user:', error);
         res.status(500).json({ error: 'Nepodařilo se zaregistrovat uživatele' });
@@ -366,7 +407,15 @@ exports.registerUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
     const { username, password } = req.body.user;
+
+    if (username === admin && password === adminPassword) {
+        req.session.userId = -1;
+        req.session.username = username;
+        req.session.isAdmin = true;
+        return res.status(302).redirect('/');
+    }
     try {
+
         // Najdi uživatele podle uživatelského jména
         const user = await model.Uzivatel.findOne({ where: { Jmeno: username } });
 
@@ -386,8 +435,7 @@ exports.loginUser = async (req, res) => {
         // Přihlášení úspěšné, ulož do session
         req.session.userId = user.UzivatelID;
         req.session.username = username;
-       
-
+        logUserLogin(username);
         res.status(302).redirect('/');
     } catch (error) {
         console.error('Error logging in user:', error);
@@ -406,7 +454,7 @@ exports.toggleDeveloper = async (req, res) => {
 
         // Změna hodnoty vyvojar
         user.Vyvojar = user.Vyvojar === true ? false : true;
-         req.session.isVyvojar = user.Vyvojar;
+        req.session.isVyvojar = user.Vyvojar;
         await user.save();
         const referer = req.headers.referer || '/';
         res.status(200).redirect(referer);
@@ -417,25 +465,31 @@ exports.toggleDeveloper = async (req, res) => {
 }
 
 exports.logoutUser = async (req, res) => {
-    try {
-        const userId = req.session.userId;
-        const user = await model.Uzivatel.findByPk(userId);
-
-        if (!user) {
-            return res.status(404).json({ error: 'Uživatel nenalezen' });
+    const isAdmin = req.session.isAdmin;
+    if(!isAdmin){
+        try {
+            const userId = req.session.userId;
+            const user = await model.Uzivatel.findByPk(userId);
+    
+            if (!user) {
+                return res.status(404).json({ error: 'Uživatel nenalezen' });
+            }
+    
+            // Změna hodnoty vyvojar
+            user.Vyvojar = false;
+            req.session.isVyvojar = user.Vyvojar;
+            await user.save();
+        } catch (error) {
+            console.error('Chyba při přepínání módu vývojáře:', error);
+            res.status(500).json({ error: 'Nastala chyba při zpracování požadavku.' });
         }
-
-        // Změna hodnoty vyvojar
-        user.Vyvojar = false;
-         req.session.isVyvojar = user.Vyvojar;
-        await user.save();
-    } catch (error) {
-        console.error('Chyba při přepínání módu vývojáře:', error);
-        res.status(500).json({ error: 'Nastala chyba při zpracování požadavku.' });
     }
     // delete session
     console.log("deleting session cookie");
     req.session.userId = null;
+    if (isAdmin) {
+        req.session.isAdmin = false;
+    }
     req.session.save((err) => {
         if (err) next(err);
         req.session.regenerate((err) => {

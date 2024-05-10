@@ -12,7 +12,7 @@ const config = {
     user: 'sa',
     password: 'heslo123',
     server: 'localhost', // Adresa serveru
-    database: '',
+    database: 'master',
     options: {
         encrypt: false,
         trustedConnection: true,
@@ -38,18 +38,38 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
-// Připojení k SQL Serveru
-sql.connect(config, (err) => {
-    if (err) throw err;
-    console.log("Connected to SQL Server");
-});
-
 app.use((req, res, next) => {
     res.locals.currentUser = req.session.userId;
+    res.locals.isAdmin = req.session.isAdmin;
     res.locals.isVyvojar = req.session.isVyvojar;
     res.locals.username = req.session.username;
+
+    if(!res.locals.currentUser){
+      config.user = "host";
+      config.password = "Heslo123";
+      console.log("do databaze je prihlaseny host");
+    } else if(res.locals.isAdmin) {
+      config.user = "sa";
+      config.password = "heslo123";
+      console.log("do databaze je prihlaseny admin");
+    } else {
+      config.user = res.locals.username;
+      config.password = req.session.password;
+      console.log(`do databaze je prihlaseny ${res.locals.username}`);
+    }
+    // Připojení k SQL Serveru
+sql.connect(config, async (err) => {
+  if (err) throw err;
+  console.log("Connected to SQL Server");
+});
+
     next();
-  });
+});
+
+sql.connect(config, async (err) => {
+  if (err) throw err;
+  console.log("Connected to SQL Server");
+});
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/Views'))

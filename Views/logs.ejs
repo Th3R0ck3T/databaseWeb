@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/CSS/index.css">
+    <link rel="stylesheet" href="/CSS/global.css">
+    <title>Logs</title>
+</head>
+<body>
+    <header>
+        <%- include('Layouts/header') %>
+    </header>
+    <div class="container">
+    <% if (isAdmin) { %>
+        <h1>Login Logs</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Login Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% logs.forEach((log) => { %>
+                        <tr>
+                            <td><%= log.id %></td>
+                            <td><%= log.UserName %></td>
+                            <td><%= log.LoginTime %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+         <% } %>
+    </div>
+    <footer>
+        <%- include('Layouts/footer')%>
+    </footer>
+</body>
+</html>

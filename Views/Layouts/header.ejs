@@ -6,15 +6,20 @@
     <div class="grid-item"><span class="uzivatel">Návštěvník</span></div>
     <% } else { %>
     <div class="grid-item"><a href="/library">Knihovna</a></div>
-    <% if(isVyvojar) { %>
+    <% if(isVyvojar || isAdmin) { %>
     <div class="grid-item"><a href="/add">Přidat hru</a></div>
     <% } %>
     <div class="grid-item"><a href="/logout">Odhlásit se</a></div>
     <div class="grid-item"><span>Přihlášený uživatel: <%=username%></span></div>
+    <% if(!isAdmin) { %>
         <% if(!isVyvojar) { %>
             <div class="grid-item"><a href="/developerMode">Přepnout do módu vývojáře</a></div>
         <% } else { %>
             <div class="grid-item"><a href="/developerMode">Přepnout do módu uživatele</a></div>
+        <% } %>
+        
+    <% } else { %>
+        <div class="grid-item"><a href="/logs">Logs</a></div>
         <% } %>
     <% } %>
 

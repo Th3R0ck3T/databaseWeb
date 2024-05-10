@@ -45,9 +45,6 @@ router.route('/developerMode')
 
 router.route('/logout').get(controller.logoutUser)
 
-
-
-
-
+router.route('/logs').get(controller.getLogs)
 
 module.exports = router;
