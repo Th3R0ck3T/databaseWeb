@@ -15,7 +15,7 @@ module.exports.isLoggedIn = (req, res, next) => {
 module.exports.isAuthor = async (req, res, next) => {
     const { id } = req.params;
     const { userId } = req.session;
-    const recipe = await Recipe.findById(id);
+    const game = await model.Hra.findById(id);
     if (!recipe) {
         throw new ExpressError("Document not found", 404);
     }

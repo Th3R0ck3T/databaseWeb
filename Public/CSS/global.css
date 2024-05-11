@@ -61,3 +61,9 @@ img {
     height: auto;
     object-fit: cover;
 }
+
+#reviewContainer {
+    border-top: 2px solid black;
+    margin: 20px;
+    padding: 20px;
+}

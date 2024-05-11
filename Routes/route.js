@@ -36,6 +36,14 @@ router.route('/detail/:id')
 router.route('/detail/:id/edit')
 .get(catchAsync(controller.renderEditGame))
 
+router.route('/detail/:id/review')
+.post(isLoggedIn, catchAsync(controller.createReview));
+
+ router.route('/detail/:id/review/:id')
+.delete(isLoggedIn, catchAsync(controller.deleteReview));
+
+
+
 router.route('/add')
 .get(catchAsync(controller.renderAddGameIndex))
 .post(isLoggedIn ,upload,catchAsync(controller.addGameIndex))
@@ -61,5 +69,6 @@ router.route('/developerMode')
 router.route('/logout').get(controller.logoutUser)
 
 router.route('/logs').get(controller.getLogs)
+
 
 module.exports = router;

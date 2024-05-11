@@ -23,10 +23,11 @@
         <h1><%=game.Jmeno%></h1>
         <p>Popis: <%=game.Popis%></p>
         <p>Kategorie: <%=game.Kategorie%></p>
-        <span>Počet kouepní: <%=game.PocetKoupeni%></span>
+        <span>Počet koupení: <%=game.PocetKoupeni%></span>
         <p>Datum vzniku: <%=game.DatumVzniku%></p>
         <p>Cena: <%= game.Cena %> Kč</p>
-        <% if(isVyvojar) { %>
+
+        <% if(isVyvojar && author.UzivatelID == currentUser) { %>
         <form action="/detail/<%=game.HraID%>?_method=DELETE" method="post">
             <button class="deleteButton">Smazat hru</button>
         </form>
@@ -46,6 +47,38 @@
                     <button type="submit">Vypůjčit</button>
                 </form>
             <% } %>
+        <% } %>
+
+        <% if (currentUser) { %>
+            <!-- Formulář pro vytvoření recenze -->
+            <h2>Napsat Recenzi:</h2>
+            <form action="/detail/<%= game.HraID %>/review" method="POST">
+                <input type="number" name="review[rating]" placeholder="1-5" required min="1" max="5">
+                <textarea name="review[comment]" placeholder="Komentář k hře"></textarea>
+                <button type="submit">Odeslat recenzi</button>
+            </form>
+        <% } %>
+        
+        <% if (reviews && reviews.length > 0) { %>
+            <!-- Zobrazení existujících recenzí -->
+            <h2>Recenze:</h2>
+            <div>
+                <% reviews.forEach(review => { %>
+                    <div id="reviewContainer">
+                        <span>Hodnocení: <%= review.Hodnoceni %></span>
+                        <h3>Uživatel: <%= review.Jmeno %></h3>
+                        <p>Komentář: <%= review.Popis %></p>
+                        <% if (currentUser && currentUser.id === review.UserId) { %>
+                            <!-- Tlačítko pro smazání recenze -->
+                            <form action="/detail/<%=game.HraID%>/review/<%=review.RecenzeID%>?_method=DELETE" method="POST">
+                                <button type="submit">Smazat recenzi</button>
+                            </form>
+                        <% } %>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <p>Zatím nejsou k této hře žádné recenze.</p>
         <% } %>
     </div>
     

@@ -115,7 +115,7 @@ exports.showGameDetail = async (req, res) => {
 
         // Získání hry z databáze SQL
         const sqlResult = await new sql.Request().query(`SELECT * FROM Hra WHERE HraID = ${gameId}`);
-
+        const author = await model.VyvojarHra.findOne({ where: {HraID: gameId}});
         // Pokud hra neexistuje, vrátíme chybu 404
         if (sqlResult.recordset.length === 0) {
             return res.status(404).json({ error: 'Hra nenalezena' });
@@ -132,8 +132,9 @@ exports.showGameDetail = async (req, res) => {
         // Vytvoření objektu hry s informací o tom, zda je zakoupena
         const game = { ...sqlResult.recordset[0], Koupena: isBought };
 
+        const reviews = await model.Recenze.findAll({ where: { HraID: gameId } });
         // Odeslání výsledků do šablony pro detail hry
-        res.render('detail', { game });
+        res.render('detail', { game, reviews, author });
     } catch (error) {
         console.error('Chyba při získávání detailů hry:', error);
         res.status(500).json({ error: 'Nastala chyba při získávání detailů hry' });
@@ -324,6 +325,7 @@ exports.buyGame = async (req, res) => {
             Koupena: true
         });
 
+        await game.increment('PocetKoupeni');
         // Aktualizace zůstatku uživatele
         await user.update({ Zustatek: currentBalance - gamePrice });
 
@@ -369,6 +371,59 @@ exports.borrowGame = async (req, res) => {
     }
 }
 
+exports.createReview = async (req, res) => {
+    const userId = req.session.userId; // Získání ID přihlášeného uživatele
+    const username = req.session.username
+    const  gameId  = req.params.id;
+    const { rating, comment } = req.body.review;
+    console.log(req.body.review);
+    try {
+        // Vytvoření recenze v databázi
+        await model.Recenze.create({
+            HraID: gameId,
+            UzivatelID: userId,
+            Jmeno: username,
+            Hodnoceni: rating,
+            Popis: comment,
+            Datum: new Date()
+        });
+
+        // Odpověď s potvrzením úspěšného vytvoření recenze
+        res.status(201).redirect(`/detail/${gameId}`);
+    } catch (error) {
+        console.error('Chyba při vytváření recenze:', error);
+        res.status(500).json({ error: 'Nastala chyba při vytváření recenze' });
+    }
+};
+
+
+exports.deleteReview = async (req, res) => {
+    const reviewId = req.params.id; // Získání ID recenze
+    try {
+        // Najděte recenzi podle ID
+        const review = await model.Recenze.findByPk(reviewId);
+
+        if (!review) {
+            return res.status(404).json({ error: 'Recenze nebyla nalezena' });
+        }
+
+        // Kontrola oprávnění - zda je uživatel autorem recenze nebo má správcovská práva
+        if (req.session.userId !== review.UzivatelID && !req.session.isAdmin) {
+            return res.status(403).json({ error: 'Nemáte oprávnění smazat tuto recenzi' });
+        }
+
+        // Smažte recenzi
+        await model.Recenze.destroy({ where: { RecenzeID: reviewId }});
+
+        // Odpověď s potvrzením úspěšného smazání recenze
+        res.status(200).redirect('/'); // Přesměrování na hlavní stránku nebo jinou vhodnou cílovou stránku
+    } catch (error) {
+        console.error('Chyba při mazání recenze:', error);
+        res.status(500).json({ error: 'Nastala chyba při mazání recenze' });
+    }
+};
+
+
 // Authentication
 
 exports.getRegisterPage = (req, res) => {
@@ -403,16 +458,27 @@ exports.registerUser = async (req, res) => {
         });
 
         // SQL dotaz pro vytvoření uživatele v databázi s odpovídajícími oprávněními
-        const createUserSQL = `
-            CREATE LOGIN ${username} WITH PASSWORD = '${hashedPassword}';
-            USE master;
-            CREATE USER ${username} FOR LOGIN ${username};
-            GRANT SELECT, INSERT, UPDATE, DELETE ON Hra TO ${username};
-            GRANT SELECT, INSERT, UPDATE, DELETE ON Recenze TO ${username};
-        `;
 
-        // Spuštění SQL dotazu
-        await model.sequelize.query(createUserSQL);
+        const createUserSQL = `
+    DECLARE @LoginExists INT;
+    SET @LoginExists = (SELECT COUNT(*) FROM sys.server_principals WHERE name = '${username}');
+
+    IF @LoginExists = 0
+    BEGIN
+        CREATE LOGIN ${username} WITH PASSWORD = '${hashedPassword}';
+        USE master;
+        CREATE USER ${username} FOR LOGIN ${username};
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Hra TO ${username};
+        GRANT SELECT, INSERT, UPDATE, DELETE ON Recenze TO ${username};
+    END
+    ELSE
+    BEGIN
+        PRINT 'Login ${username} already exists.';
+    END;
+`;
+
+    // Spuštění SQL dotazu
+    await model.sequelize.query(createUserSQL);
 
 
         // Odeslání výsledků jako odpověď
