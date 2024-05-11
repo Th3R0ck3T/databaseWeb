@@ -170,7 +170,13 @@ const Hra = sequelize.define('Hra', {
     }*/
   }, {
     tableName: 'Hra',
-    timestamps: false
+    timestamps: false,
+    indexes: [
+      {
+          unique: false, 
+          fields: ['Jmeno'] 
+      }
+  ]
   });
   
   /*// Definice modelu pro tabulku Kategorie
@@ -313,6 +319,8 @@ const Hra = sequelize.define('Hra', {
     tableName: 'Logins', // Nastavení názvu tabulky
     timestamps: false // Pokud nechcete Sequelize automaticky spravovat timestampy
   });
+
+ 
 
 // Vytvoření vztahu mezi tabulkami
 // vztah mezi tabulkami Uzivatel a prihlasovaciUdaje
