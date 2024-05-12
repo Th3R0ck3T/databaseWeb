@@ -160,14 +160,6 @@ const Hra = sequelize.define('Hra', {
       type: DataTypes.STRING(100),
       allowNull: true,
     }
-    /*KategorieID: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Kategorie',
-        key: 'KategorieID'
-      }
-    }*/
   }, {
     tableName: 'Hra',
     timestamps: false,
@@ -178,27 +170,6 @@ const Hra = sequelize.define('Hra', {
       }
   ]
   });
-  
-  /*// Definice modelu pro tabulku Kategorie
-  const Kategorie = sequelize.define('Kategorie', {
-    Jmeno: {
-      type: DataTypes.STRING(20),
-      allowNull: true
-    },
-    Popis: {
-      type: DataTypes.STRING(500),
-      allowNull: true
-    },
-    KategorieID: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-      allowNull: false
-    }
-  }, {
-    tableName: 'Kategorie',
-    timestamps: false
-  });*/
   
   // Definice modelu pro tabulku Recenze
   const Recenze = sequelize.define('Recenze', {
@@ -325,8 +296,7 @@ const Hra = sequelize.define('Hra', {
 // Vytvoření vztahu mezi tabulkami
 // vztah mezi tabulkami Uzivatel a prihlasovaciUdaje
 Uzivatel.belongsTo(PrihlasovaciUdaje, { foreignKey: 'PrihlasovaciUdajeID' });
-// Vztah mezi tabulkami Hra a Kategorie
-//Hra.belongsTo(Kategorie, { foreignKey: 'KategorieID' });
+
 // Vztah mezi tabulkami Uzivatel a Recenze
 Uzivatel.hasMany(Recenze, { foreignKey: 'UzivatelID' });
 
