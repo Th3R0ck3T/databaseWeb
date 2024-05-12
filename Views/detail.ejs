@@ -68,7 +68,7 @@
                         <span>Hodnocení: <%= review.Hodnoceni %></span>
                         <h3>Uživatel: <%= review.Jmeno %></h3>
                         <p>Komentář: <%= review.Popis %></p>
-                        <% if (currentUser && currentUser.id === review.UserId) { %>
+                        <% if (currentUser && username == review.Jmeno) { %>
                             <!-- Tlačítko pro smazání recenze -->
                             <form action="/detail/<%=game.HraID%>/review/<%=review.RecenzeID%>?_method=DELETE" method="POST">
                                 <button type="submit">Smazat recenzi</button>
